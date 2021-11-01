@@ -14,7 +14,7 @@ import dns.resolver
 
 from urllib.parse import urlparse
 
-from flask import Flask, request, render_template, Response, send_from_directory
+from flask import Flask, request, redirect, render_template, Response, send_from_directory
 from flask_compress import Compress
 from flask_socketio import SocketIO, emit
 
@@ -287,6 +287,11 @@ def performance_test(sid, id, sourcelabel, targetlabel, target, port, runcount, 
 
 
 @app.route('/')
+def run_iscapp():
+    return redirect("/static/isc2022app/index.html", code=302)
+
+
+@app.route('/diag')
 def runner_ui():
     host = request.host
     if str.find(host, ':') > 0:
@@ -309,22 +314,6 @@ def send_screenshot(name):
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def get_resource(path):  # pragma: no cover
-    mimetypes = {
-        ".css": "text/css",
-        ".html": "text/html",
-        ".js": "application/javascript",
-        ".jpeg": "image/jpeg",
-        ".ico": "image/x-icon"
-    }
-    complete_path = os.path.join(root_dir(), path)
-    ext = os.path.splitext(path)[1]
-    mimetype = mimetypes.get(ext, "text/html")
-    content = get_file(complete_path)
-    return Response(content, mimetype=mimetype)
-
-
-@app.route('/diag/<path:name>', defaults={'path': ''})
 def get_resource(path):  # pragma: no cover
     mimetypes = {
         ".css": "text/css",
