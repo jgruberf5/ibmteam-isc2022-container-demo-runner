@@ -288,7 +288,8 @@ def performance_test(sid, id, sourcelabel, targetlabel, target, port, runcount, 
 
 @app.route('/')
 def run_iscapp():
-    return redirect("/static/isc2022app/index.html", code=302)
+    return render_template(
+        'iscapp_index.html')
 
 
 @app.route('/diag')
@@ -300,7 +301,7 @@ def runner_ui():
     banner_background_color = "#%s" % os.getenv('BANNER_COLOR', '000000')
     banner_text_color = '#%s' % os.getenv('BANNER_TEXT_COLOR', 'ffffff')
     return render_template(
-        'index.html',
+        'diag_index.html',
         hostname='connecting...',
         banner_text=(banner_text),
         banner_background_color=banner_background_color,
