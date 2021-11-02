@@ -76,13 +76,13 @@ RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packa
     apt-get update && \
     apt-get install -u kubectl
 
-RUN git clone https://github.com/jgruberf5/container-demo-runner.git
+RUN git clone https://github.com/jgruberf5/ibmteam-isc2022-container-demo-runner.git
 
-RUN pip3 install -r /container-demo-runner/requirements.txt
+RUN pip3 install -r /ibmteam-isc2022-container-demo-runner/requirements.txt
 
 EXPOSE 8080
 EXPOSE 5001
 EXPOSE 5201
 EXPOSE 11111
 
-ENTRYPOINT [ "/container-demo-runner/run.sh" ]
+ENTRYPOINT [ "/ibmteam-isc2022-container-demo-runner/run.sh" ]
