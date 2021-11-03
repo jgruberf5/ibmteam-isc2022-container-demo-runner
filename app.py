@@ -308,6 +308,33 @@ def runner_ui():
         banner_text_color=banner_text_color)
 
 
+@app.route('/dump')
+def dump_ui():
+    banner_text = os.getenv('BANNER', '')
+    banner_background_color = "#%s" % os.getenv('BANNER_COLOR', '000000')
+    banner_text_color = '#%s' % os.getenv('BANNER_TEXT_COLOR', 'ffffff')
+    request_header_out_string = ""
+    request_env_out_string = ""
+    for (header, value) in request.headers:
+        request_header_out_string = "%s%s: %s\n" % (
+            request_header_out_string, header, value)
+    for e in request.environ:
+        request_env_out_string = "%s%s: %s\n" % (
+            request_env_out_string,
+            e,
+            request.environ[e])
+    return render_template(
+        'dump_index.html',
+        hostname=getHostname(),
+        banner_text=(banner_text),
+        banner_background_color=banner_background_color,
+        banner_text_color=banner_text_color,
+        requestmethod=request.method,
+        requesturl=request.url,
+        requestheaders=request_header_out_string,
+        requestenv=request_env_out_string)
+
+
 @app.route('/webscreenshots/<path:name>')
 def send_screenshot(name):
     return send_from_directory(PUPPETEER_HOME, name, mimetype='image/jepg')
