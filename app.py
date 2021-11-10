@@ -29,6 +29,9 @@ PUPPETEER_HOME = os.getenv('PYPPETEER_HOME', '/tmp/webscreenshots')
 
 UPLOAD_FOLDER = "%s/uploads" % (tempfile.gettempdir())
 
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER, mode=0o777)
+
 config = {}
 
 with open(CONFIG_FILE, 'r') as config_yaml:
