@@ -6,15 +6,17 @@ import subprocess
 import yaml
 import os
 import signal
+import tempfile
 import psutil
 import socket
 import re
 import base64
 import dns.resolver
 
+from werkzeug.utils import secure_filename
 from urllib.parse import urlparse
 
-from flask import Flask, request, redirect, render_template, Response, send_from_directory
+from flask import Flask, request, render_template, Response, send_from_directory
 from flask_compress import Compress
 from flask_socketio import SocketIO, emit
 
@@ -24,6 +26,8 @@ CONFIG_FILE = os.getenv('CONFIG_FILE', './config.yaml')
 CONFIG_MAP_DIR = '/etc/container-demo-runner'
 NAMESPACE_FILE = '/var/run/secrets/kubernetes.io/serviceaccount/namespace'
 PUPPETEER_HOME = os.getenv('PYPPETEER_HOME', '/tmp/webscreenshots')
+
+UPLOAD_FOLDER = "%s/uploads" % (tempfile.gettempdir())
 
 config = {}
 
@@ -338,6 +342,53 @@ def dump_ui():
 @app.route('/webscreenshots/<path:name>')
 def send_screenshot(name):
     return send_from_directory(PUPPETEER_HOME, name, mimetype='image/jepg')
+
+
+@app.route('/upload', methods=['POST', 'GET'])
+def upload():
+    if request.method == 'POST':
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename:
+                fn = secure_filename(file.filename)
+                file.save(os.path.join(UPLOAD_FOLDER, fn))
+    file_listing = "<ul>"
+    for f in os.listdir(UPLOAD_FOLDER):
+        file_listing = "%s<li><a href='/upload/%s'>%s</a>" % (
+            file_listing, f, f)
+    file_listing = "%s</ul>" % file_listing
+    return """
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    <hr/>
+    <div>
+    <pre>
+    %s
+    </pre>
+    </div
+    """ % (file_listing)
+
+
+@app.route('/upload/<path:path>')
+def get_uploaded_file(path):  # pragma: no cover
+    mimetypes = {
+        ".css": "text/css",
+        ".html": "text/html",
+        ".htm": "text/html",
+        ".js": "application/javascript",
+        ".jpeg": "image/jpeg",
+        ".ico": "image/x-icon"
+    }
+    complete_path = os.path.join(UPLOAD_FOLDER, path)
+    ext = os.path.splitext(path)[1]
+    mimetype = mimetypes.get(ext, "application/binary")
+    content = get_file(complete_path)
+    return Response(content, mimetype=mimetype)
 
 
 @app.route('/', defaults={'path': ''})
